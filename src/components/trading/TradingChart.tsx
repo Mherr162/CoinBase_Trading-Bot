@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -13,6 +14,7 @@ interface TradingChartProps {
 type TimeFrame = "1h" | "4h" | "1d";
 
 const TradingChart = ({ symbol }: TradingChartProps) => {
+  const { toast } = useToast();
   const [timeFrame, setTimeFrame] = useState<TimeFrame>("1d");
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -119,6 +121,11 @@ const TradingChart = ({ symbol }: TradingChartProps) => {
         console.error('Error fetching chart data:', error);
         setChartData([]);
         setNoData(true);
+        toast({
+          title: "Chart Data Error",
+          description: "Failed to fetch chart data. Please try again later.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }

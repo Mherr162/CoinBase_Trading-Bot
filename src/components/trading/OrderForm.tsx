@@ -1,11 +1,11 @@
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
 import { CoinbaseAPI } from "@/services/coinbaseApi";
 
 interface OrderFormProps {
@@ -46,6 +46,11 @@ const OrderForm = ({ symbol, accessToken }: OrderFormProps) => {
         }
       } catch (error) {
         console.error('Error fetching price:', error);
+        toast({
+          title: "Price Fetch Error",
+          description: "Failed to fetch current price. Please try again later.",
+          variant: "destructive",
+        });
       }
     };
 

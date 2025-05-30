@@ -36,12 +36,14 @@ interface CoinbaseStats {
 
 const BASE_URL = 'https://api.exchange.coinbase.com';
 
+import { fetchWithRetry } from './fetchWithRetry';
+
 export class CoinbaseAPI {
   // Get all available trading pairs
   static async getProducts(): Promise<CoinbaseProduct[]> {
     try {
-      const response = await fetch(`${BASE_URL}/products`);
-      if (!response.ok) throw new Error('Failed to fetch products');
+      const response = await fetchWithRetry(`${BASE_URL}/products`);
+      if (!response.ok) throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
       return await response.json();
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -52,8 +54,8 @@ export class CoinbaseAPI {
   // Get current price data for a symbol
   static async getTicker(symbol: string): Promise<CoinbaseTicker | null> {
     try {
-      const response = await fetch(`${BASE_URL}/products/${symbol}/ticker`);
-      if (!response.ok) throw new Error('Failed to fetch ticker');
+      const response = await fetchWithRetry(`${BASE_URL}/products/${symbol}/ticker`);
+      if (!response.ok) throw new Error(`Failed to fetch ticker for ${symbol}: ${response.status} ${response.statusText}`);
       return await response.json();
     } catch (error) {
       console.error('Error fetching ticker:', error);
@@ -64,8 +66,8 @@ export class CoinbaseAPI {
   // Get 24hr stats for a symbol
   static async getStats(symbol: string): Promise<CoinbaseStats | null> {
     try {
-      const response = await fetch(`${BASE_URL}/products/${symbol}/stats`);
-      if (!response.ok) throw new Error('Failed to fetch stats');
+      const response = await fetchWithRetry(`${BASE_URL}/products/${symbol}/stats`);
+      if (!response.ok) throw new Error(`Failed to fetch stats for ${symbol}: ${response.status} ${response.statusText}`);
       return await response.json();
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -95,10 +97,10 @@ export class CoinbaseAPI {
         ...(end && { end })
       });
       
-      const response = await fetch(`${BASE_URL}/products/${symbol}/candles?${params}`);
+      const response = await fetchWithRetry(`${BASE_URL}/products/${symbol}/candles?${params}`);
       
       if (!response.ok) {
-        console.warn(`Failed to fetch candles for ${symbol}, status: ${response.status}`);
+        console.warn(`Failed to fetch candles for ${symbol}, status: ${response.status} ${response.statusText}`);
         return [];
       }
       
@@ -127,8 +129,8 @@ export class CoinbaseAPI {
   // Get order book data
   static async getOrderBook(symbol: string, level: number = 2) {
     try {
-      const response = await fetch(`${BASE_URL}/products/${symbol}/book?level=${level}`);
-      if (!response.ok) throw new Error('Failed to fetch order book');
+      const response = await fetchWithRetry(`${BASE_URL}/products/${symbol}/book?level=${level}`);
+      if (!response.ok) throw new Error(`Failed to fetch order book for ${symbol}: ${response.status} ${response.statusText}`);
       return await response.json();
     } catch (error) {
       console.error('Error fetching order book:', error);

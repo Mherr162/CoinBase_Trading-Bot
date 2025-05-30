@@ -7,7 +7,7 @@ interface LoginCoinbaseProps {
 
 const COINBASE_AUTH_URL = "https://www.coinbase.com/oauth/authorize";
 const CLIENT_ID = import.meta.env.VITE_COINBASE_CLIENT_ID || "";
-const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI || "http://localhost:3000";
+const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI || "http://localhost:8080";
 const SCOPES = "wallet:accounts:read wallet:transactions:read";
 
 const LoginCoinbase = ({ onLoginSuccess }: LoginCoinbaseProps) => {

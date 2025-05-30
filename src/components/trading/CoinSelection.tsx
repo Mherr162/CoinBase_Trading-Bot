@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import { CoinbaseAPI } from "@/services/coinbaseApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ interface Coin {
 }
 
 const CoinSelection = ({ selectedCoin, onCoinChange }: CoinSelectionProps) => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
   const [favorites, setFavorites] = useState<string[]>(["BTC/USDT", "ETH/USDT"]);
@@ -68,7 +70,11 @@ const CoinSelection = ({ selectedCoin, onCoinChange }: CoinSelectionProps) => {
         }));
         prevPrices = prices;
       } catch (e) {
-        // Ignore errors for now
+        toast({
+          title: "Coin Prices Error",
+          description: "Failed to fetch coin prices. Please try again later.",
+          variant: "destructive",
+        });
       }
     };
     fetchPrices();

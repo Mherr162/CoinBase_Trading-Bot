@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Table,
   TableBody,
@@ -22,6 +23,7 @@ interface MarketStat {
 }
 
 const MarketData = ({ symbol }: MarketDataProps) => {
+  const { toast } = useToast();
   const [marketData, setMarketData] = useState<MarketStat[]>([]);
 
   const [loading, setLoading] = useState(false);
@@ -92,6 +94,11 @@ const MarketData = ({ symbol }: MarketDataProps) => {
       } catch (error) {
         console.error('Error fetching market data:', error);
         setMarketData([]);
+        toast({
+          title: "Market Data Error",
+          description: "Failed to fetch market data. Please try again later.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
