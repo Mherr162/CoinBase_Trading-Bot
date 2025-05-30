@@ -1,0 +1,11 @@
+# Dependencies
+node_modules
+
+# Environment variables
+.env
+cdp_api_key.json
+.env.local
+.env.example
+
+# OS generated files
+.DS_Store       .env.local
