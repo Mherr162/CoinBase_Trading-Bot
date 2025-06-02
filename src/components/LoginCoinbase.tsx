@@ -15,36 +15,104 @@ const LoginCoinbase = ({ onLoginSuccess }: LoginCoinbaseProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Check for access token in URL hash
-    const params = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = params.get('access_token');
-    const error = params.get('error');
-    const errorDescription = params.get('error_description');
+  // Validate token by making a test API call
+  const validateToken = async (token: string) => {
+    try {
+      const response = await fetch('https://api.coinbase.com/v2/user', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'CB-VERSION': '2024-01-01'
+        }
+      });
 
-    if (accessToken) {
-      // Store token in localStorage for persistence
-      localStorage.setItem('coinbase_token', accessToken);
-      onLoginSuccess(accessToken);
-      // Clean up the URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-      toast({
-        title: "Login Successful",
-        description: "Successfully connected to Coinbase",
-      });
-    } else if (error) {
-      toast({
-        title: "Login Failed",
-        description: errorDescription || "Failed to connect to Coinbase",
-        variant: "destructive",
-      });
+      if (!response.ok) {
+        throw new Error('Token validation failed');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      localStorage.removeItem('coinbase_token');
+      return false;
     }
+  };
+
+  useEffect(() => {
+    const handleAuth = async () => {
+      // Check for access token in URL hash
+      const params = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = params.get('access_token');
+      const error = params.get('error');
+      const errorDescription = params.get('error_description');
+      const state = params.get('state');
+      const savedState = localStorage.getItem('oauth_state');
+
+      // Clean up state
+      localStorage.removeItem('oauth_state');
+
+      // Clean up URL immediately
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      if (error || errorDescription) {
+        toast({
+          title: "Login Failed",
+          description: errorDescription || "Failed to connect to Coinbase",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (accessToken) {
+        if (state !== savedState) {
+          toast({
+            title: "Security Error",
+            description: "OAuth state mismatch. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setIsLoading(true);
+        try {
+          const isValid = await validateToken(accessToken);
+          if (isValid) {
+            localStorage.setItem('coinbase_token', accessToken);
+            onLoginSuccess(accessToken);
+            toast({
+              title: "Login Successful",
+              description: "Successfully connected to Coinbase",
+            });
+          } else {
+            throw new Error('Invalid token received');
+          }
+        } catch (error) {
+          toast({
+            title: "Authentication Error",
+            description: "Failed to validate Coinbase connection",
+            variant: "destructive",
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    handleAuth();
 
     // Check for existing token on mount
-    const existingToken = localStorage.getItem('coinbase_token');
-    if (existingToken) {
-      onLoginSuccess(existingToken);
-    }
+    const checkExistingToken = async () => {
+      const existingToken = localStorage.getItem('coinbase_token');
+      if (existingToken) {
+        setIsLoading(true);
+        const isValid = await validateToken(existingToken);
+        if (isValid) {
+          onLoginSuccess(existingToken);
+        }
+        setIsLoading(false);
+      }
+    };
+
+    checkExistingToken();
   }, [onLoginSuccess, toast]);
 
   const handleLogin = () => {
@@ -57,7 +125,6 @@ const LoginCoinbase = ({ onLoginSuccess }: LoginCoinbaseProps) => {
       return;
     }
 
-    setIsLoading(true);
     try {
       // Generate a random state parameter for security
       const state = Math.random().toString(36).substring(7);
@@ -79,7 +146,6 @@ const LoginCoinbase = ({ onLoginSuccess }: LoginCoinbaseProps) => {
         description: "Failed to initiate login process. Please try again.",
         variant: "destructive",
       });
-      setIsLoading(false);
     }
   };
 
@@ -108,8 +174,9 @@ const LoginCoinbase = ({ onLoginSuccess }: LoginCoinbaseProps) => {
           variant="destructive"
           onClick={handleLogout}
           className="w-full"
+          disabled={isLoading}
         >
-          Disconnect Coinbase
+          {isLoading ? "Checking connection..." : "Disconnect Coinbase"}
         </Button>
       ) : (
         <Button
