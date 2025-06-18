@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import "./LoginCoinbase.css";
 
 interface LoginCoinbaseProps {
   onLoginSuccess: (accessToken: string) => void;
@@ -62,7 +63,7 @@ const LoginCoinbase = ({ onLoginSuccess }: LoginCoinbaseProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center p-6 gap-4 border rounded-lg bg-muted/50">
+    <div className="interactive-bg flex flex-col items-center p-6 gap-4 border">
       <h2 className="text-xl font-semibold">Connect to Coinbase</h2>
       <p className="text-sm text-muted-foreground text-center">
         Login to your Coinbase account to connect your wallet and access trading features.

@@ -96,6 +96,58 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    min-height: 100vh;
+    min-width: 100vw;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    /* background removed from here to be set globally at the end of the file */
+    @apply text-foreground;
   }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body {
+  background: url('/cryptocurrency-background.jpg') center center / cover no-repeat fixed !important;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(20, 20, 30, 0.6);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root, .app, main, .dashboard-root {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}
+
+
+
+.dashboard {
+  background: url('/cryptocurrency-background.jpg') center center / cover no-repeat fixed !important;
+  min-height: 100vh !important;
+  min-width: 100vw !important;
+  position: relative;
+}
+.dashboard::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(20, 20, 30, 0.6);
+  pointer-events: none;
+  z-index: 0;
 }
